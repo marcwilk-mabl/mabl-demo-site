@@ -60,6 +60,19 @@ export default function App() {
   const [login, setLogin] = useState({ email: '', password: '' })
   const [loginStatus, setLoginStatus] = useState<'idle' | 'ok' | 'bad'>('idle')
 
+  const [creditCard, setCreditCard] = useState({
+    cardNumber: '',
+    expDate: '',
+    cvv: '',
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    country: '',
+  })
+  const [creditCardStatus, setCreditCardStatus] = useState<'idle' | 'ok' | 'bad'>('idle')
+
   // Table
   const [search, setSearch] = useState('')
   const rows = useMemo(() => {
@@ -99,6 +112,28 @@ export default function App() {
     const ok = validateEmail(login.email) && login.password.length >= 6
     setLoginStatus(ok ? 'ok' : 'bad')
     showToast(ok ? 'Login successful (mock).' : 'Login failed — check inputs.', ok ? 'success' : 'error')
+  }
+
+  function handleCreditCardSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const cardRegex = /^\d{13,19}$/ // 13-19 digit card numbers
+    const expRegex = /^\d{2}\/\d{2}$/ // MM/YY format
+    const cvvRegex = /^\d{3,4}$/ // 3-4 digit CVV
+    const zipRegex = /^\d{5}(?:-\d{4})?$/ // 5 or 5+4 format
+
+    const ok =
+      cardRegex.test(creditCard.cardNumber.replace(/\s/g, '')) &&
+      expRegex.test(creditCard.expDate) &&
+      cvvRegex.test(creditCard.cvv) &&
+      creditCard.name.trim().length > 0 &&
+      creditCard.address.trim().length > 0 &&
+      creditCard.city.trim().length > 0 &&
+      creditCard.state.trim().length > 0 &&
+      zipRegex.test(creditCard.zip) &&
+      creditCard.country.trim().length > 0
+
+    setCreditCardStatus(ok ? 'ok' : 'bad')
+    showToast(ok ? 'Payment processed (mock).' : 'Payment failed — check inputs.', ok ? 'success' : 'error')
   }
 
   function randomizeWidgets() {
@@ -340,6 +375,211 @@ export default function App() {
                       </div>
                     </form>
                   </div>
+                </div>
+
+                <div className="spacer" />
+
+                <div className="card">
+                  <div className="cardHeader">
+                    <h3>Credit card payment</h3>
+                    <p className="muted">Test credit card form with billing address validation.</p>
+                  </div>
+
+                  <form onSubmit={handleCreditCardSubmit} className="form" aria-label="Credit card form">
+                    <div className="grid2">
+                      <div className="field">
+                        <label htmlFor="cc-number">Card number</label>
+                        <input
+                          id="cc-number"
+                          data-testid="cc-number"
+                          type="text"
+                          value={creditCard.cardNumber}
+                          onChange={(e) => {
+                            setCreditCard(s => ({ ...s, cardNumber: e.target.value }))
+                            setCreditCardStatus('idle')
+                          }}
+                          placeholder="1234 5678 9012 3456"
+                          autoComplete="cc-number"
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label htmlFor="cc-name">Cardholder name</label>
+                        <input
+                          id="cc-name"
+                          data-testid="cc-name"
+                          type="text"
+                          value={creditCard.name}
+                          onChange={(e) => {
+                            setCreditCard(s => ({ ...s, name: e.target.value }))
+                            setCreditCardStatus('idle')
+                          }}
+                          placeholder="John Doe"
+                          autoComplete="cc-name"
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label htmlFor="cc-exp">Expiration (MM/YY)</label>
+                        <input
+                          id="cc-exp"
+                          data-testid="cc-exp"
+                          type="text"
+                          value={creditCard.expDate}
+                          onChange={(e) => {
+                            setCreditCard(s => ({ ...s, expDate: e.target.value }))
+                            setCreditCardStatus('idle')
+                          }}
+                          placeholder="12/25"
+                          autoComplete="cc-exp"
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label htmlFor="cc-cvv">CVV</label>
+                        <input
+                          id="cc-cvv"
+                          data-testid="cc-cvv"
+                          type="text"
+                          value={creditCard.cvv}
+                          onChange={(e) => {
+                            setCreditCard(s => ({ ...s, cvv: e.target.value }))
+                            setCreditCardStatus('idle')
+                          }}
+                          placeholder="123"
+                          autoComplete="cc-csc"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="divider" />
+
+                    <div className="gridHeader">Billing address</div>
+
+                    <div className="field">
+                      <label htmlFor="cc-address">Address</label>
+                      <input
+                        id="cc-address"
+                        data-testid="cc-address"
+                        type="text"
+                        value={creditCard.address}
+                        onChange={(e) => {
+                          setCreditCard(s => ({ ...s, address: e.target.value }))
+                          setCreditCardStatus('idle')
+                        }}
+                        placeholder="123 Main St"
+                        autoComplete="street-address"
+                      />
+                    </div>
+
+                    <div className="grid2">
+                      <div className="field">
+                        <label htmlFor="cc-city">City</label>
+                        <input
+                          id="cc-city"
+                          data-testid="cc-city"
+                          type="text"
+                          value={creditCard.city}
+                          onChange={(e) => {
+                            setCreditCard(s => ({ ...s, city: e.target.value }))
+                            setCreditCardStatus('idle')
+                          }}
+                          placeholder="New York"
+                          autoComplete="address-level2"
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label htmlFor="cc-state">State</label>
+                        <input
+                          id="cc-state"
+                          data-testid="cc-state"
+                          type="text"
+                          value={creditCard.state}
+                          onChange={(e) => {
+                            setCreditCard(s => ({ ...s, state: e.target.value }))
+                            setCreditCardStatus('idle')
+                          }}
+                          placeholder="NY"
+                          autoComplete="address-level1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid2">
+                      <div className="field">
+                        <label htmlFor="cc-zip">ZIP code</label>
+                        <input
+                          id="cc-zip"
+                          data-testid="cc-zip"
+                          type="text"
+                          value={creditCard.zip}
+                          onChange={(e) => {
+                            setCreditCard(s => ({ ...s, zip: e.target.value }))
+                            setCreditCardStatus('idle')
+                          }}
+                          placeholder="10001"
+                          autoComplete="postal-code"
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label htmlFor="cc-country">Country</label>
+                        <input
+                          id="cc-country"
+                          data-testid="cc-country"
+                          type="text"
+                          value={creditCard.country}
+                          onChange={(e) => {
+                            setCreditCard(s => ({ ...s, country: e.target.value }))
+                            setCreditCardStatus('idle')
+                          }}
+                          placeholder="United States"
+                          autoComplete="country-name"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="btnRow">
+                      <button id="btn-cc-submit" data-testid="btn-cc-submit" className="btn" type="submit">
+                        Process payment
+                      </button>
+                      <button
+                        id="btn-cc-clear"
+                        data-testid="btn-cc-clear"
+                        className="btn ghost"
+                        type="button"
+                        onClick={() => {
+                          setCreditCard({
+                            cardNumber: '',
+                            expDate: '',
+                            cvv: '',
+                            name: '',
+                            address: '',
+                            city: '',
+                            state: '',
+                            zip: '',
+                            country: '',
+                          })
+                          setCreditCardStatus('idle')
+                          showToast('Credit card form cleared.', 'info')
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+
+                    <div
+                      className={creditCardStatus === 'idle' ? 'status muted' : creditCardStatus === 'ok' ? 'status ok' : 'status bad'}
+                      data-testid="cc-status"
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {creditCardStatus === 'idle' && 'Status: waiting'}
+                      {creditCardStatus === 'ok' && 'Status: payment processed'}
+                      {creditCardStatus === 'bad' && 'Status: payment failed'}
+                    </div>
+                  </form>
                 </div>
               </div>
             )}
