@@ -52,6 +52,10 @@ export default function App() {
   const [counter, setCounter] = useState(0)
   const [slider, setSlider] = useState(35)
   const [toggle, setToggle] = useState(true)
+  const [selectValue, setSelectValue] = useState('US')
+  const [radioValue, setRadioValue] = useState('option1')
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Forms
   const [newsletterEmail, setNewsletterEmail] = useState('')
@@ -149,19 +153,19 @@ export default function App() {
 
       <Header
         onOpenModal={() => setModalOpen(true)}
-        onToast={() => showToast('This is a toast notification.', 'info')}
-        onOpenGithub={() => showToast('Add your own repo remote here.', 'info')}
+        onToast={() => showToast('This is a notification.', 'info')}
+        onOpenGithub={() => showToast('Add your own repository.', 'info')}
       />
 
       <main id="main" className="main">
-        <Hero onPrimary={() => showToast('Primary CTA clicked.', 'success')} onSecondary={() => showToast('Secondary CTA clicked.', 'info')} />
+        <Hero onPrimary={() => showToast('Test flow started.', 'success')} onSecondary={() => showToast('Explore the patterns below.', 'info')} />
 
         <section className="section" aria-labelledby="tabs-title">
           <div className="container">
             <div className="sectionHeader">
-              <h2 id="tabs-title">Sandbox modules</h2>
+              <h2 id="tabs-title">Test patterns</h2>
               <p className="muted">
-                UI patterns that are handy for building mabl tests: forms, modals, tables, tabs, toggles, and stateful content.
+                Common workflows and UI interactions: form submission, modals, data tables, tabs, stateful components, and input validation.
               </p>
             </div>
 
@@ -206,27 +210,27 @@ export default function App() {
                 <div className="grid3">
                   <FeatureCard
                     icon={<IconBolt />}
-                    title="Stable selectors"
-                    text="Key elements include ids and data-testid attributes so your mabl flows can target reliably."
+                    title="Reliable selectors"
+                    text="All interactive elements use ids and data-testid attributes for predictable test target selection."
                   />
                   <FeatureCard
                     icon={<IconShield />}
-                    title="Form validation"
-                    text="Try valid/invalid inputs, error states, and submit handling to practice assertions."
+                    title="Real validation"
+                    text="Test input validation, error handling, and edge cases that mirror production workflows."
                   />
                   <FeatureCard
                     icon={<IconBeaker />}
-                    title="Stateful UI"
-                    text="Widgets update and render different states—great for waiting, verifying, and conditional flows."
+                    title="State transitions"
+                    text="Dynamic UI that changes in response to user actions—perfect for testing waits and conditional paths."
                   />
                 </div>
 
                 <div className="callout" role="note" data-testid="how-to-callout">
-                  <div className="calloutTitle">Try it:</div>
+                  <div className="calloutTitle">Build test flows with these patterns:</div>
                   <ul className="calloutList">
-                    <li>Click <strong>Open Modal</strong> in the header, then close it with the X or background.</li>
-                    <li>Use the <strong>Newsletter</strong> form with an invalid email to trigger an error.</li>
-                    <li>Filter the <strong>Customer table</strong> and verify the row count changes.</li>
+                    <li>Interact with the <strong>Modal</strong>—open via button, close with X or overlay click.</li>
+                    <li>Validate form behavior with <strong>Newsletter</strong>—test valid and invalid email submission.</li>
+                    <li>Search and filter the <strong>Customer table</strong>—verify dynamic row count updates and empty states.</li>
                   </ul>
                 </div>
               </div>
@@ -237,8 +241,8 @@ export default function App() {
                 <div className="grid2">
                   <div className="card">
                     <div className="cardHeader">
-                      <h3>Interactive widgets</h3>
-                      <p className="muted">Good for clicking, toggling, typing, and assertions.</p>
+                      <h3>Interactive elements</h3>
+                      <p className="muted">Stateful components to test clicks, input changes, and state transitions.</p>
                     </div>
 
                     <div className="widgets">
@@ -309,13 +313,124 @@ export default function App() {
                           Disabled button
                         </button>
                       </div>
+
+                      <div className="divider" />
+
+                      <div className="widgetRow">
+                        <div style={{ width: '100%' }}>
+                          <label htmlFor="select-country" className="label">Country</label>
+                          <select
+                            id="select-country"
+                            data-testid="select-country"
+                            className="select"
+                            value={selectValue}
+                            onChange={(e) => setSelectValue(e.target.value)}
+                          >
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="AU">Australia</option>
+                            <option value="DE">Germany</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="divider" />
+
+                      <div className="widgetRow">
+                        <div>
+                          <div className="label">Priority</div>
+                          <div className="radioGroup">
+                            <label className="radioLabel">
+                              <input
+                                type="radio"
+                                id="radio-low"
+                                data-testid="radio-low"
+                                name="priority"
+                                value="low"
+                                checked={radioValue === 'low'}
+                                onChange={(e) => setRadioValue(e.target.value)}
+                              />
+                              <span>Low</span>
+                            </label>
+                            <label className="radioLabel">
+                              <input
+                                type="radio"
+                                id="radio-medium"
+                                data-testid="radio-medium"
+                                name="priority"
+                                value="medium"
+                                checked={radioValue === 'medium'}
+                                onChange={(e) => setRadioValue(e.target.value)}
+                              />
+                              <span>Medium</span>
+                            </label>
+                            <label className="radioLabel">
+                              <input
+                                type="radio"
+                                id="radio-high"
+                                data-testid="radio-high"
+                                name="priority"
+                                value="high"
+                                checked={radioValue === 'high'}
+                                onChange={(e) => setRadioValue(e.target.value)}
+                              />
+                              <span>High</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="divider" />
+
+                      <div className="widgetRow">
+                        <div style={{ width: '100%' }}>
+                          <label htmlFor="file-upload" className="label">Upload file</label>
+                          <input
+                            id="file-upload"
+                            data-testid="file-upload"
+                            type="file"
+                            className="fileInput"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              setUploadedFile(file?.name || null)
+                              if (file) showToast(`File selected: ${file.name}`, 'success')
+                            }}
+                          />
+                          {uploadedFile && (
+                            <div className="success" data-testid="file-selected" style={{ marginTop: '8px' }}>
+                              ✓ {uploadedFile}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="divider" />
+
+                      <div className="widgetRow">
+                        <button
+                          id="btn-async"
+                          data-testid="btn-async"
+                          className="btn"
+                          disabled={isLoading}
+                          onClick={() => {
+                            setIsLoading(true)
+                            setTimeout(() => {
+                              setIsLoading(false)
+                              showToast('Async operation completed!', 'success')
+                            }, 2000)
+                          }}
+                        >
+                          {isLoading ? 'Loading...' : 'Start async task'}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   <div className="card">
                     <div className="cardHeader">
-                      <h3>Mock login</h3>
-                      <p className="muted">Email must be valid. Password must be 6+ characters.</p>
+                      <h3>Login form</h3>
+                      <p className="muted">Test email validation and password requirements with real-time feedback.</p>
                     </div>
 
                     <form onSubmit={handleLoginSubmit} className="form" aria-label="Mock login form">
@@ -381,8 +496,8 @@ export default function App() {
 
                 <div className="card">
                   <div className="cardHeader">
-                    <h3>Credit card payment</h3>
-                    <p className="muted">Test credit card form with billing address validation.</p>
+                    <h3>Payment form</h3>
+                    <p className="muted">Complex form with card and address validation for comprehensive workflow testing.</p>
                   </div>
 
                   <form onSubmit={handleCreditCardSubmit} className="form" aria-label="Credit card form">
@@ -616,8 +731,8 @@ export default function App() {
                 <div className="grid2">
                   <div className="card">
                     <div className="cardHeader">
-                      <h3>FAQ accordion</h3>
-                      <p className="muted">Great for expanding/collapsing and verifying text visibility.</p>
+                      <h3>Accordion</h3>
+                      <p className="muted">Test expand/collapse interactions and conditional content visibility.</p>
                     </div>
                     <div className="accordion" data-testid="faq-accordion">
                       {faqs.map(item => {
@@ -646,8 +761,8 @@ export default function App() {
 
                   <div className="card">
                     <div className="cardHeader">
-                      <h3>Newsletter</h3>
-                      <p className="muted">Practice input, validation, and submit assertions.</p>
+                      <h3>Newsletter signup</h3>
+                      <p className="muted">Simple form with real-time validation and success/error state feedback.</p>
                     </div>
 
                     <form onSubmit={handleNewsletterSubmit} className="form" aria-label="Newsletter form">
@@ -706,8 +821,8 @@ export default function App() {
         <section className="section" aria-labelledby="table-title">
           <div className="container">
             <div className="sectionHeader">
-              <h2 id="table-title">Recent test runs</h2>
-              <p className="muted">A searchable table (filtering changes the number of rows).</p>
+              <h2 id="table-title">Test data & search</h2>
+              <p className="muted">Search and filter users to practice table interactions, row selection, and data validation.</p>
             </div>
 
             <div className="tableCard card">
@@ -857,10 +972,16 @@ function Header({
   return (
     <header className="header">
       <div className="container headerInner">
-        <div className="brand" aria-label="mabl demo brand">
+        <a href="#" className="brand" aria-label="mabl demo site" onClick={(e) => {
+          e.preventDefault()
+          window.scrollTo(0, 0)
+          document.documentElement.scrollTop = 0
+          document.body.scrollTop = 0
+          window.location.hash = ''
+        }}>
           <div className="logoMark" aria-hidden="true" />
-          <span className="brandText">mabl sandbox lab</span>
-        </div>
+          <span className="brandText">mabl demo</span>
+        </a>
 
         <nav className="nav" aria-label="Primary">
           <a className="navLink" href="#tabs-title" data-testid="nav-modules">Modules</a>
@@ -888,17 +1009,17 @@ function Hero({ onPrimary, onSecondary }: { onPrimary: () => void; onSecondary: 
     <section className="hero" aria-labelledby="hero-title">
       <div className="container heroInner">
         <div className="heroCopy">
-          <div className="pill">Local • React • Test-friendly</div>
-          <h1 id="hero-title">A polished sandbox for practicing mabl end-to-end tests</h1>
+          <div className="pill">Reliable • Repeatable • Real-world</div>
+          <h1 id="hero-title">Test automation sandbox for intelligent testing</h1>
           <p className="muted">
-            Built as a simple landing page with reliable selectors, common UI patterns, and state changes you can automate against.
+            A fully functional demo site with stable selectors, real-world UI patterns, and dynamic behavior for building reliable test flows.
           </p>
           <div className="btnRow">
             <button id="btn-cta-primary" data-testid="btn-cta-primary" className="btn" onClick={onPrimary}>
-              Primary CTA
+              Build a test
             </button>
             <button id="btn-cta-secondary" data-testid="btn-cta-secondary" className="btn ghost" onClick={onSecondary}>
-              Secondary CTA
+              Explore sandbox
             </button>
           </div>
 
@@ -920,16 +1041,16 @@ function Hero({ onPrimary, onSecondary }: { onPrimary: () => void; onSecondary: 
 
         <div className="heroCard" aria-label="Hero demo card">
           <div className="heroCardTop">
-            <div className="heroCardTitle">Workflow actions</div>
-            <div className="muted">Fast state changes you can automate against</div>
+            <div className="heroCardTitle">Test scenarios</div>
+            <div className="muted">Common user flows and workflows you can automate</div>
           </div>
 
           <div className="heroCardBody">
             <button className="btn wide" id="btn-hero-action-1" data-testid="btn-hero-action-1" onClick={onPrimary}>
-              Run a demo action
+              Start building
             </button>
             <button className="btn ghost wide" id="btn-hero-action-2" data-testid="btn-hero-action-2" onClick={onSecondary}>
-              View demo details
+              View all patterns
             </button>
             <div className="miniGrid">
               <MiniCard title="Forms" text="Validate + submit" />
@@ -1022,10 +1143,10 @@ function Footer() {
     <footer className="footer">
       <div className="container footerInner">
         <div className="muted">
-          Built for local sandbox testing • <span className="mono">data-testid</span> selectors included
+          Designed for local test automation • <span className="mono">data-testid</span> selectors built-in
         </div>
         <div className="muted">
-          Customize freely — add routes, APIs, auth mocks, or whatever you want.
+          Extend this sandbox—add pages, APIs, authentication flows, and real-world scenarios.
         </div>
       </div>
     </footer>
