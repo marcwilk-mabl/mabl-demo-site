@@ -10,10 +10,10 @@
 on:
   push:
     branches: [main]
-name: mabl Tests
+name: mabl Cloud Run (post-merge)
 jobs:
   test:
-    name: mabl Test
+    name: mabl full plan (cloud)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
