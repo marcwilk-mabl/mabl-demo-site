@@ -2,12 +2,14 @@
 #  mabl Tests — mabl-demo-site
 #  Cloud path (deployment event). Runs tests in the mabl cloud
 #  with full diagnostics: screenshots, AI failure analysis,
-#  cross-browser. USES CREDITS. Fires on every push.
+#  cross-browser. USES CREDITS. Fires on pushes to main.
 #
 #  The free, 0-credit PR version lives in: mabl-pr-ci.yml
 # ============================================================
 
-on: [push]
+on:
+  push:
+    branches: [main]
 name: mabl Tests
 jobs:
   test:
