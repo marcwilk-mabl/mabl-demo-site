@@ -1,0 +1,38 @@
+# ============================================================
+#  mabl PR Check (CI Runner) — mabl-demo-site
+#  Free, 0-credit path. Runs tests inside the GitHub runner on
+#  pull requests. Pass/fail only (no screenshots/AI/cross-browser).
+#
+#  Prereq: a "Command Line Interface" type mabl API key, stored as
+#  the repo secret MABL_CLI_API_KEY. (Different key type than the
+#  "CI/CD Integration" key the cloud workflow in mabl.yml uses.)
+#
+#  The credits/cloud version lives in: mabl.yml
+# ============================================================
+
+on: [pull_request]
+name: mabl PR Check (CI Runner)
+jobs:
+  ci-runner-test:
+    name: mabl PR smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      - uses: mablhq/setup-mabl-cli@v1
+        with:
+          workspace-id: aE3vmXhG6wGtsBTVvyuLmA-w
+        env:
+          MABL_API_KEY: ${{ secrets.MABL_CLI_API_KEY }}   # "Command Line Interface" type key
+      - name: Run mabl tests (headless, 0 credits)
+        run: mabl tests run --id Bd3NsNytY3aVLj9XnjPW8g-j --url https://mabl-demo-site.vercel.app -e yO2qOcdBdoSjIlFceAhKqQ-e --headless
+
+# Notes:
+#  - --id runs one test. Swap for --labels smoke once a few fast tests
+#    are tagged, so the PR gate is a curated smoke set.
+#  - In a real PR you'd point --url at the Vercel PREVIEW deploy for the
+#    branch, not prod, so you test the actual change.
+#  - To make this a merge gate, add "mabl PR smoke test" as a required
+#    status check in the repo's branch protection rules.

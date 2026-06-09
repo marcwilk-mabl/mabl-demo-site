@@ -1,3 +1,12 @@
+# ============================================================
+#  mabl Tests — mabl-demo-site
+#  Cloud path (deployment event). Runs tests in the mabl cloud
+#  with full diagnostics: screenshots, AI failure analysis,
+#  cross-browser. USES CREDITS. Fires on every push.
+#
+#  The free, 0-credit PR version lives in: mabl-pr-ci.yml
+# ============================================================
+
 on: [push]
 name: mabl Tests
 jobs:
@@ -9,9 +18,10 @@ jobs:
       - name: Run mabl tests
         uses: mablhq/github-run-tests-action@v1
         env:
-          MABL_API_KEY: ${{ secrets.MABL_API_KEY }}
+          MABL_API_KEY: ${{ secrets.MABL_API_KEY }}        # "CI/CD Integration" type key
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           application-id: T4O4nIxujfGOWjpxaQA73A-a
           environment-id: S1zFp7RFx0F4phrmdapJ3Q-e
-          continue-on-failure: 'true'
+          continue-on-failure: 'true'   # 'true' = a failed test won't fail the job
+                                        # (doesn't gate the merge). Set 'false' to block.
