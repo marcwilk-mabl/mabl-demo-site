@@ -35,4 +35,4 @@ Look for `data-testid` attributes:
 ## Customize
 This is intentionally simple. Add pages, routing, mock APIs, auth flows, file uploads — anything you want to expand your test surface.
 
-Have fun 👋
+Have fun 👋 
