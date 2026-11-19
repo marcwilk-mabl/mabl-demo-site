@@ -27,6 +27,9 @@ on:
       datatable_id:
         description: 'DataTable ID for this OEM (ends in -vt)'
         required: true
+      base_url:
+        description: 'Base URL the test runs against (for example your UAT API URL)'
+        required: true
 
 jobs:
   local-run:
@@ -47,5 +50,6 @@ jobs:
           mabl tests run \
             --id ${{ inputs.test_id }} \
             --data-table-id ${{ inputs.datatable_id }} \
-            --application-id T4O4nIxujfGOWjpxaQA73A-a \
-            --environment-id S1zFp7RFx0F4phrmdapJ3Q-e
+            --url ${{ inputs.base_url }} \
+            --application-id yterJm5GNUfecODb6TGSDg-a \
+            --environment-id yO2qOcdBdoSjIlFceAhKqQ-e
