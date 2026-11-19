@@ -1,0 +1,51 @@
+# ============================================================
+#  mabl Local Run (0 credits)
+#  Runs one mabl test inside the GitHub runner, once for every
+#  scenario (row) in a DataTable. For the big on-demand pulls.
+#  Pass/fail only in GitHub. Local API runs don't show up in mabl's
+#  results, so the test should save anything you need (like the
+#  filtered rates) itself.
+#
+#  Secret to add (repo Settings > Secrets and variables > Actions):
+#    MABL_CLI_API_KEY   "Command Line Interface" type key
+#
+#  Notes:
+#  - Cloud credentials can't be used in local runs. Any credential
+#    this test uses must be a regular (non-cloud) credential.
+#  - The runner must be able to reach your UAT APIs, since the test
+#    runs right here instead of in the mabl cloud.
+# ============================================================
+
+name: mabl Local Run (DataTable)
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_id:
+        description: 'mabl test ID (ends in -j)'
+        required: true
+      datatable_id:
+        description: 'DataTable ID for this OEM (ends in -vt)'
+        required: true
+
+jobs:
+  local-run:
+    name: Run test across DataTable
+    runs-on: ubuntu-latest
+    env:
+      MABL_API_KEY: ${{ secrets.MABL_CLI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - uses: mablhq/setup-mabl-cli@v1
+        with:
+          workspace-id: aE3vmXhG6wGtsBTVvyuLmA-w
+      - name: Run test for every scenario in the DataTable
+        run: |
+          mabl tests run \
+            --id ${{ inputs.test_id }} \
+            --data-table-id ${{ inputs.datatable_id }} \
+            --application-id T4O4nIxujfGOWjpxaQA73A-a \
+            --environment-id S1zFp7RFx0F4phrmdapJ3Q-e

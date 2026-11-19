@@ -1,0 +1,81 @@
+# ============================================================
+#  mabl Cloud Run + CSV report
+#  Runs your mabl plan in the mabl cloud (USES CREDITS), then
+#  pulls the results from mabl's reporting API into a CSV you
+#  can download from the workflow run.
+#
+#  Secrets to add (repo Settings > Secrets and variables > Actions):
+#    MABL_API_KEY        "CI/CD Integration" type key (runs the plan)
+#    MABL_REPORTING_KEY  "Viewer" type key (reads the results)
+#
+#  Replace the PLACEHOLDER values below with your IDs.
+# ============================================================
+
+name: mabl Cloud Run + Report
+
+on:
+  workflow_dispatch:
+
+env:
+  WORKSPACE_ID: aE3vmXhG6wGtsBTVvyuLmA-w
+
+jobs:
+  test:
+    name: Run mabl plan and build report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Note the start time
+        run: echo "START_MS=$(date +%s%3N)" >> $GITHUB_ENV
+
+      - name: Run mabl tests
+        id: mabl
+        uses: mablhq/github-run-tests-action@v1
+        env:
+          MABL_API_KEY: ${{ secrets.MABL_API_KEY }}
+        with:
+          application-id: T4O4nIxujfGOWjpxaQA73A-a
+          environment-id: S1zFp7RFx0F4phrmdapJ3Q-e
+          continue-on-failure: 'true'              # keep going so the report still builds
+
+      - name: Pull results into a CSV
+        env:
+          MABL_REPORTING_KEY: ${{ secrets.MABL_REPORTING_KEY }}
+        run: |
+          curl -s -u "key:${MABL_REPORTING_KEY}" \
+            "https://api.mabl.com/results/workspace/${WORKSPACE_ID}/testRuns?earliest_run_start_time=${START_MS}" \
+            > results.json
+          jq -r '
+            ["test_name","scenario_name","status","success","failure_step","failure_error","ai_headline","run_link"],
+            (.test_results[] | [
+              .test_name, .scenario_name, .status, .success,
+              .failure_summary.step_number, .failure_summary.error,
+              .failure_analysis.headline, .test_run_app_url
+            ]) | @csv' results.json > mabl-results.csv
+          echo "Rows in report: $(($(wc -l < mabl-results.csv) - 1))"
+
+      - name: Save the report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mabl-results
+          path: mabl-results.csv
+
+      - name: Show summary
+        run: |
+          echo "Tests run:    ${{ steps.mabl.outputs.tests_run }}"
+          echo "Tests passed: ${{ steps.mabl.outputs.tests_passed }}"
+          echo "Tests failed: ${{ steps.mabl.outputs.tests_failed }}"
+
+      # Optional: fail the workflow if any test failed (remove to never block)
+      - name: Fail if tests failed
+        if: steps.mabl.outputs.tests_failed != '0'
+        run: exit 1
+
+# Notes:
+#  - The reporting API returns results a page at a time. This pulls the first
+#    page, which covers a single plan run. For big runs, see the paging script
+#    in mabl's "Exporting and filtering test runs with a script" doc.
+#  - Next step for your Excel report: add your own step after "Pull results"
+#    that turns mabl-results.csv (plus your test's saved list) into the
+#    formatted Excel file.
