@@ -78,6 +78,7 @@ jobs:
               > results.json
             count=$(jq '.test_results | length' results.json 2>/dev/null || echo 0)
             echo "Attempt ${attempt}: ${count} results"
+            head -c 400 results.json; echo
             if [ "$count" -ge "${{ steps.mabl.outputs.tests_run }}" ]; then break; fi
             sleep 20
           done
