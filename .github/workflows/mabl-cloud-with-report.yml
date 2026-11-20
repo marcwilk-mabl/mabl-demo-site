@@ -1,20 +1,35 @@
 # ============================================================
 #  mabl Cloud Run + CSV report
-#  Runs your mabl plan in the mabl cloud (USES CREDITS), then
-#  pulls the results from mabl's reporting API into a CSV you
-#  can download from the workflow run.
+#  Pick an application from the dropdown. The workflow runs that
+#  application's mabl plans in the mabl cloud (USES CREDITS), pulls
+#  the results into a CSV you can download from the workflow run,
+#  and sends the report to that application's recipients.
 #
-#  Secrets to add (repo Settings > Secrets and variables > Actions):
-#    MABL_API_KEY        "CI/CD Integration" type key (runs the plan)
+#  Secrets (repo Settings > Secrets and variables > Actions > Secrets):
+#    MABL_API_KEY        "CI/CD Integration" type key (runs the plans)
 #    MABL_REPORTING_KEY  "Viewer" type key (reads the results)
 #
-#  Replace the PLACEHOLDER values below with your IDs.
+#  Variables (same page > Variables tab), one per application.
+#  Recipients aren't secret, so they live here, and your team can
+#  change who gets the report without editing this file:
+#    RECIPIENTS_CARDS     e.g. team-a@example.com,lead-a@example.com
+#    RECIPIENTS_DISPENSE  e.g. team-b@example.com
+#
+#  Each option runs the plans that carry its plan label in mabl.
 # ============================================================
 
 name: mabl Cloud Run + Report
 
 on:
   workflow_dispatch:
+    inputs:
+      application:
+        description: 'Which application to test'
+        required: true
+        type: choice
+        options:
+          - Credit cards
+          - Dispense setup
 
 env:
   WORKSPACE_ID: aE3vmXhG6wGtsBTVvyuLmA-w
@@ -25,6 +40,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Pick plan label and recipients
+        id: pick
+        run: |
+          case "${{ inputs.application }}" in
+            "Credit cards")
+              echo "label=gha-cards" >> $GITHUB_OUTPUT
+              echo "recipients=${{ vars.RECIPIENTS_CARDS }}" >> $GITHUB_OUTPUT ;;
+            "Dispense setup")
+              echo "label=gha-dispense" >> $GITHUB_OUTPUT
+              echo "recipients=${{ vars.RECIPIENTS_DISPENSE }}" >> $GITHUB_OUTPUT ;;
+          esac
 
       - name: Note the start time
         run: echo "START_MS=$(date +%s%3N)" >> $GITHUB_ENV
@@ -37,6 +64,7 @@ jobs:
         with:
           application-id: T4O4nIxujfGOWjpxaQA73A-a
           environment-id: S1zFp7RFx0F4phrmdapJ3Q-e
+          plan-labels: ${{ steps.pick.outputs.label }}
           continue-on-failure: 'true'              # keep going so the report still builds
 
       - name: Pull results into a CSV
@@ -60,6 +88,13 @@ jobs:
         with:
           name: mabl-results
           path: mabl-results.csv
+
+      # Replace this step with your existing email setup.
+      # It already knows who to send to: steps.pick.outputs.recipients
+      - name: Email the report
+        run: |
+          echo "Would send mabl-results.csv for ${{ inputs.application }}"
+          echo "To: ${{ steps.pick.outputs.recipients }}"
 
       - name: Show summary
         run: |
