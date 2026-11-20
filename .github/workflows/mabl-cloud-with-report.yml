@@ -71,9 +71,16 @@ jobs:
         env:
           MABL_REPORTING_KEY: ${{ secrets.MABL_REPORTING_KEY }}
         run: |
-          curl -s -u "key:${MABL_REPORTING_KEY}" \
-            "https://api.mabl.com/results/workspace/${WORKSPACE_ID}/testRuns?earliest_run_start_time=${START_MS}" \
-            > results.json
+          # Results can take a minute to show up, so try a few times
+          for attempt in 1 2 3 4 5 6; do
+            curl -s -u "key:${MABL_REPORTING_KEY}" \
+              "https://api.mabl.com/results/workspace/${WORKSPACE_ID}/testRuns?earliest_run_start_time=${START_MS}" \
+              > results.json
+            count=$(jq '.test_results | length' results.json 2>/dev/null || echo 0)
+            echo "Attempt ${attempt}: ${count} results"
+            if [ "$count" -ge "${{ steps.mabl.outputs.tests_run }}" ]; then break; fi
+            sleep 20
+          done
           jq -r '
             ["test_name","scenario_name","status","success","failure_step","failure_error","ai_headline","run_link"],
             (.test_results[] | [
